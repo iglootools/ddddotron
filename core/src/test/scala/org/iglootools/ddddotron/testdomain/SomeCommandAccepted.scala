@@ -4,7 +4,7 @@ import org.iglootools.ddddotron._
 import org.joda.time.DateTime
 
 
-final case class SomeCommandAccepted(val eventUtcDate: DateTime = currentUtcDateTime) extends TestDomainEvent
+final case class SomeCommandAccepted(val timestamp: DateTime = currentUtcDateTime) extends TestDomainEvent
 
 
 

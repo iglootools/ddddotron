@@ -53,7 +53,7 @@ class InMemoryEventStore(implicit eventSerializer: EventSerializer,
   }
 
   protected[this] def persistEvent[E <: Event](streamType: String, streamId: GUID, revision: Revision, event: E) = {
-    require(event.eventUtcDate.getZone == DateTimeZone.UTC, "Event Date must be in the UTC Zone")
+    require(event.timestamp.getZone == DateTimeZone.UTC, "Event Date must be in the UTC Zone")
 
     jdbcTemplate.update("""INSERT INTO event(stream_type, stream_id, revision, payload_type, payload_version, payload, event_timestamp)
         VALUES(?, ?, ?, ?, ?, ?, ?)""",
@@ -61,9 +61,9 @@ class InMemoryEventStore(implicit eventSerializer: EventSerializer,
       streamId,
       revision.asInstanceOf[AnyRef],
       event.eventType,
-      event.eventDataVersion.asInstanceOf[AnyRef],
+      event.version.asInstanceOf[AnyRef],
       eventSerializer.serialize(event),
-      event.eventUtcDate.toDate)
+      event.timestamp.toDate)
   }
 
   def committedEvents(streamType: String, streamId: GUID, fromRevision: Revision = commitRevisionOne): List[CommittedEvent[Event]] = {
