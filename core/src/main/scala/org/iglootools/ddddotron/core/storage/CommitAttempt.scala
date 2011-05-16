@@ -1,7 +1,6 @@
-package org.iglootools.ddddotron.core
+package org.iglootools.ddddotron.core.storage
 
-import org.joda.time.{DateTimeZone, DateTime}
-import storage.Locking
+import org.iglootools.ddddotron.core._
 
 /**
  * @param revision is the revision on which this commit is based

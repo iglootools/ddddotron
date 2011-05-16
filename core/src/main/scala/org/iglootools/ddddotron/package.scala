@@ -11,8 +11,7 @@ package object ddddotron {
   type EventSourced[E <: Event, ES <: EventSourced[E,ES]] = core.EventSourced[E,ES]
   type AggregateRootIdentityProvider = core.AggregateRootIdentityProvider
   type AggregateRootFactory[E <: Event, S <: AnyRef, AR <: AggregateRoot[E, S, AR]] = core.AggregateRootFactory[E,S,AR]
-  type CommitAttempt[+E <: Event] = core.CommitAttempt[E]
-  val CommitAttempt = core.CommitAttempt
+
   type CommittedEvent[+E <: Event] = core.CommittedEvent[E]
   type Command = core.Command
   type Event = core.Event
@@ -22,6 +21,8 @@ package object ddddotron {
   val StreamSnapshot = core.StreamSnapshot
 
   // Core.Storage
+  type CommitAttempt[+E <: Event] = core.storage.CommitAttempt[E]
+  val CommitAttempt = core.storage.CommitAttempt
   type Repository[E <: Event, S<:AnyRef, AR <: AggregateRoot[E,S, AR]] = core.storage.Repository[E,S,AR]
   type EventStore = core.storage.EventStore
   type ConcurrencyException = core.storage.ConcurrencyException
