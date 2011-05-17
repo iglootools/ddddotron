@@ -8,8 +8,9 @@ class Project(info: ProjectInfo) extends ParentProject(info) with IdeaProject  {
   //val publishTo = "Iglootools" at "http://www.iglootools.org/artifactory/iglootools-release-local"
   //Credentials(Path.userHome / ".ivy2" / ".credentials", log)
 
-  lazy val core = project("core", "ddddotron-core", new Core(_))
-  lazy val integrationTests = project("integration-tests", "integration-tests", new IntegrationTests(_), core)
+  lazy val api = project("api", "ddddotron-api", new Api(_))
+  lazy val eventstore = project("eventstore", "ddddotron-eventstore", new EventStore(_), api)
+  lazy val integrationTests = project("integration-tests", "integration-tests", new IntegrationTests(_), api)
 
   object Dependencies {
     val SpringFrameworkVersion = "3.0.5.RELEASE"
@@ -36,7 +37,7 @@ class Project(info: ProjectInfo) extends ParentProject(info) with IdeaProject  {
       </dependencies>
   }
 
-  class Core(info: ProjectInfo) extends DefaultProject(info) with IdeaProject {
+  class Api(info: ProjectInfo) extends DefaultProject(info) with IdeaProject {
     override def ivyXML = Dependencies.ivyXML
     val grizzled = "org.clapper" %% "grizzled-slf4j" % "0.4"
 
@@ -50,7 +51,18 @@ class Project(info: ProjectInfo) extends ParentProject(info) with IdeaProject  {
     lazy val scalaj_collection = "org.scalaj" % "scalaj-collection_2.8.0" % "1.0"
     lazy val iglootoolsCommons = "org.iglootools.commons" %% "iglootools-commons-scala" % "0.1"
 
-    // infrastructure
+
+    // test
+    lazy val junit = Dependencies.Test.junit
+    lazy val scalaTest = Dependencies.Test.scalaTest
+    lazy val mockito = Dependencies.Test.mockito
+    lazy val logbackTest = Dependencies.Test.logbackTest
+    lazy val springTest = Dependencies.Test.springTest
+  }
+
+  class EventStore(info: ProjectInfo) extends DefaultProject(info) with IdeaProject {
+    override def ivyXML = Dependencies.ivyXML
+
     lazy val liftJson = "net.liftweb" %% "lift-json" % Dependencies.LiftJsonVersion withSources()
     lazy val liftJsonExt = "net.liftweb" %% "lift-json-ext" % Dependencies.LiftJsonVersion withSources()
     lazy val springJdbc = "org.springframework" % "spring-jdbc" % Dependencies.SpringFrameworkVersion withSources()

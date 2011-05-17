@@ -1,10 +1,13 @@
-package org.iglootools.ddddotron.core
+package org.iglootools.ddddotron.tests
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
-import org.iglootools.commons.scalatest.SpringSupport
-import org.junit.runner.RunWith
 import org.iglootools.ddddotron._
+import org.iglootools.commons.scalatest.SpringSupport
+import org.iglootools.ddddotron.infrastructure.serialization._
+import org.iglootools.ddddotron.infrastructure.eventstore.InMemoryEventStore
+import  org.iglootools.ddddotron.infrastructure.ei.NullEventBus
+import org.junit.runner.RunWith
 import org.iglootools.ddddotron.testdomain._
 
 import javax.sql.DataSource
@@ -13,6 +16,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcTemplate
 import org.springframework.transaction.support.DefaultTransactionDefinition
 import org.springframework.transaction.{TransactionStatus, TransactionDefinition, PlatformTransactionManager}
 import org.iglootools.ddddotron.storage.Locking
+
 
 @RunWith(classOf[JUnitRunner])
 class RepositorySpec extends Spec with ShouldMatchers with SpringSupport with BeforeAndAfterEach {

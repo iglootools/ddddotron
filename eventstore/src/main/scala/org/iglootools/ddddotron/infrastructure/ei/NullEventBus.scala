@@ -1,7 +1,6 @@
 package org.iglootools.ddddotron.infrastructure.ei
 
-import org.iglootools.ddddotron.core.Event
-import org.iglootools.ddddotron.ei._
+import org.iglootools.ddddotron._
 
 /**
  * An EventBus that discards the events

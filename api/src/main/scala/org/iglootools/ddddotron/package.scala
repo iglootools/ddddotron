@@ -13,6 +13,7 @@ package object ddddotron {
   type AggregateRootFactory[E <: Event, S <: AnyRef, AR <: AggregateRoot[E, S, AR]] = core.AggregateRootFactory[E,S,AR]
 
   type CommittedEvent[+E <: Event] = core.CommittedEvent[E]
+  val CommittedEvent = core.CommittedEvent
   type Command = core.Command
   type Event = core.Event
   type EventHistory[+E <: Event, +S <: AnyRef] = core.EventHistory[E,S]
@@ -46,10 +47,10 @@ package object ddddotron {
   type SerializedEventUpgrader = eventmigration.SerializedEventUpgrader
 
   // infrastructure
-  type InMemoryEventStore = infrastructure.eventstore.InMemoryEventStore
-  type JsonAggregateRootStateSerializer = infrastructure.serialization.JsonAggregateRootStateSerializer
-  type JsonEventSerializer = infrastructure.serialization.JsonEventSerializer
-  type NullEventBus = infrastructure.ei.NullEventBus
+//  type InMemoryEventStore = infrastructure.eventstore.InMemoryEventStore
+//  type JsonAggregateRootStateSerializer = infrastructure.serialization.JsonAggregateRootStateSerializer
+//  type JsonEventSerializer = infrastructure.serialization.JsonEventSerializer
+//  type NullEventBus = infrastructure.ei.NullEventBus
 
 
   // helpers
