@@ -1,7 +1,6 @@
 package org.iglootools.ddddotron.core
 
-import storage.Locking
-;
+import org.iglootools.ddddotron.storage.Locking
 
 object EventHistories {
   def eventHistory[E <:Event, S <: AnyRef](snapshot: Option[StreamSnapshot[S]]=None, additionalEvents: List[E]=List()): EventHistory[E,S] = {

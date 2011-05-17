@@ -20,15 +20,17 @@ package object ddddotron {
   type StreamSnapshot[S <: AnyRef] = core.StreamSnapshot[S]
   val StreamSnapshot = core.StreamSnapshot
 
-  // Core.Storage
-  type CommitAttempt[+E <: Event] = core.storage.CommitAttempt[E]
-  val CommitAttempt = core.storage.CommitAttempt
-  type Repository[E <: Event, S<:AnyRef, AR <: AggregateRoot[E,S, AR]] = core.storage.Repository[E,S,AR]
-  type EventStore = core.storage.EventStore
-  type ConcurrencyException = core.storage.ConcurrencyException
-  val OptimisticLockingStrategy = core.storage.OptimisticLockingStrategy
-  type OptimisticLockingStrategy = core.storage.OptimisticLockingStrategy
-  type EventBus = core.storage.EventBus
+  // Storage
+  type CommitAttempt[+E <: Event] = storage.CommitAttempt[E]
+  val CommitAttempt = storage.CommitAttempt
+  type Repository[E <: Event, S<:AnyRef, AR <: AggregateRoot[E,S, AR]] = storage.Repository[E,S,AR]
+  type EventStore = storage.EventStore
+  type ConcurrencyException = storage.ConcurrencyException
+  val OptimisticLockingStrategy = storage.OptimisticLockingStrategy
+  type OptimisticLockingStrategy = storage.OptimisticLockingStrategy
+
+  // Enterprise Integration
+  type EventBus = ei.EventBus
 
    // Serialization (used by infrastructure)
   type EventSerializer = serialization.EventSerializer

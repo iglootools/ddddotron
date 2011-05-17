@@ -1,4 +1,4 @@
-package org.iglootools.ddddotron.core.storage
+package org.iglootools.ddddotron.storage
 
 /**
  * This strategy is to be used when a collision is expected to be merged later.

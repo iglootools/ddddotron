@@ -1,6 +1,7 @@
 package org.iglootools.ddddotron.infrastructure.eventstore
 
-import org.iglootools.ddddotron.core.storage._
+import org.iglootools.ddddotron.storage._
+import org.iglootools.ddddotron.ei._
 import org.iglootools.ddddotron.serialization._
 import javax.sql.DataSource
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate

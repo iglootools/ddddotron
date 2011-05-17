@@ -1,5 +1,5 @@
-package org.iglootools.ddddotron.core.storage
-import org.iglootools.ddddotron.core.commitRevisionOne
+package org.iglootools.ddddotron.storage
+import org.iglootools.ddddotron.core._
 
 /**
  * We expect the underlying storage to throw an exception if the given revision is not the latest one

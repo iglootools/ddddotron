@@ -12,7 +12,7 @@ import org.scalatest.{BeforeAndAfterEach, Spec}
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate
 import org.springframework.transaction.support.DefaultTransactionDefinition
 import org.springframework.transaction.{TransactionStatus, TransactionDefinition, PlatformTransactionManager}
-import storage.Locking
+import org.iglootools.ddddotron.storage.Locking
 
 @RunWith(classOf[JUnitRunner])
 class RepositorySpec extends Spec with ShouldMatchers with SpringSupport with BeforeAndAfterEach {

@@ -1,9 +1,10 @@
-package org.iglootools.ddddotron.core.storage
+package org.iglootools.ddddotron.storage
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
-import org.iglootools.ddddotron._
+import org.iglootools.ddddotron.core._
+
 import org.iglootools.ddddotron.testdomain._
 import org.scalatest.Spec
 

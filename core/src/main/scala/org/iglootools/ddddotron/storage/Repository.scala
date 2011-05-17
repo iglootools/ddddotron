@@ -1,6 +1,7 @@
-package org.iglootools.ddddotron.core.storage
+package org.iglootools.ddddotron.storage
 
 import org.iglootools.ddddotron.core._
+import org.iglootools.ddddotron.ei._
 
 final class Repository[E <: Event, S<:AnyRef, AR <: AggregateRoot[E,S,AR]](val aggregateRootType: String)
                                                                           (implicit aggregateRootFactory: AggregateRootFactory[E,S,AR],

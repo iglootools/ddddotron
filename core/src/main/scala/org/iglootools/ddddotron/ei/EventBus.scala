@@ -1,4 +1,4 @@
-package org.iglootools.ddddotron.core.storage
+package org.iglootools.ddddotron.ei
 
 import org.iglootools.ddddotron.core._
 
