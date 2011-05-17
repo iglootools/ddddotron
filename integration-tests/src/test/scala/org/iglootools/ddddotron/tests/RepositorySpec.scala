@@ -3,12 +3,10 @@ package org.iglootools.ddddotron.tests
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
 import org.iglootools.ddddotron._
-import org.iglootools.commons.scalatest.SpringSupport
-import org.iglootools.ddddotron.infrastructure.serialization._
-import org.iglootools.ddddotron.infrastructure.eventstore.InMemoryEventStore
-import  org.iglootools.ddddotron.infrastructure.ei.NullEventBus
-import org.junit.runner.RunWith
+import org.iglootools.ddddotron.infrastructure._
 import org.iglootools.ddddotron.testdomain._
+import org.iglootools.commons.scalatest.SpringSupport
+import org.junit.runner.RunWith
 
 import javax.sql.DataSource
 import org.scalatest.{BeforeAndAfterEach, Spec}
@@ -26,7 +24,7 @@ class RepositorySpec extends Spec with ShouldMatchers with SpringSupport with Be
   implicit val eventSerializer = new JsonEventSerializer(List(Serializable[MyEvent], Serializable[SomeCommandAccepted], Serializable[AnotherCommandAccepted], Serializable[SomethingCreated]))
   implicit val aggregateRootStateSerializer: AggregateRootStateSerializer = new JsonAggregateRootStateSerializer
   implicit val serializedEventUpgradeManager = new DefaultSerializedEventUpgradeManager(List())
-  implicit val eventStore: EventStore = new InMemoryEventStore
+  implicit val eventStore: EventStore = new JdbcEventStore
   implicit val eventBus: EventBus = new NullEventBus
   implicit val someAggregateRootFactory = SomeAggregateRoot
   val repository = SomeAggregateRootRepository()

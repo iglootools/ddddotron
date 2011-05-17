@@ -27,7 +27,7 @@ import grizzled.slf4j.Logging
  * @see https://github.com/gregoryyoung/m-r/blob/master/SimpleCQRS/EventStore.cs
  * @see http://jasondentler.com/blog/2010/10/simple-cqrs-nhibernate-event-store/
  */
-class InMemoryEventStore(implicit eventSerializer: EventSerializer,
+class JdbcEventStore(implicit eventSerializer: EventSerializer,
                          streamStateSerializer: StreamStateSerializer,
                          serializedEventUpgradeManager: SerializedEventUpgradeManager,
                          dataSource: DataSource) extends EventStore with Logging {
