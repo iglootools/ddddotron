@@ -9,8 +9,8 @@ class Project(info: ProjectInfo) extends ParentProject(info) with IdeaProject  {
   //Credentials(Path.userHome / ".ivy2" / ".credentials", log)
 
   lazy val api = project("api", "ddddotron-api", new Api(_))
-  lazy val eventstore = project("eventstore", "ddddotron-eventstore", new EventStore(_), api)
-  lazy val integrationTests = project("integration-tests", "integration-tests", new IntegrationTests(_), api)
+  lazy val infrastructure = project("infrastructure", "ddddotron-infrastructure", new EventStore(_), api)
+  lazy val integrationTests = project("integration-tests", "integration-tests", new IntegrationTests(_), api, infrastructure)
 
   object Dependencies {
     val SpringFrameworkVersion = "3.0.5.RELEASE"
