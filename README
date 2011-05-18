@@ -1,0 +1,7 @@
+$ sudo apt-get install python-migrate
+$ sudo postgres
+psql
+ create role ddddotron LOGIN PASSWORD 'ddddotron';
+ create database ddddotron_test with owner=ddddotron encoding='UTF8' tablespace=pg_default;
+psql -d ddddotron_test -f /tmp/schema.sql
+

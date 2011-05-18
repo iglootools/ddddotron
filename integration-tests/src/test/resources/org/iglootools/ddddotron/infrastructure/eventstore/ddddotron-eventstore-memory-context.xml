@@ -23,8 +23,8 @@
         <import resource="eventstore/sql.ddddotron-sql-context.xml" />
     -->
 
-    <jdbc:embedded-database id="dataSource">
-        <jdbc:script location="classpath:/org/iglootools/ddddotron/eventstore/memory/schema.sql"/>
+    <jdbc:embedded-database id="hsqldbDataSource">
+        <jdbc:script location="classpath:/org/iglootools/ddddotron/infrastructure/eventstore/hsqldb-schema.sql"/>
     </jdbc:embedded-database>
 
     <!--<bean id="eventStore" class="org.iglootools.ddddotron.eventstore.memory.InMemoryEventStore">
@@ -33,7 +33,7 @@
 
     <!-- a PlatformTransactionManager is still required -->
     <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource"/>
+        <property name="dataSource" ref="hsqldbDataSource"/>
     </bean>
 
 </beans>

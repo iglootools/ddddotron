@@ -10,7 +10,7 @@ CREATE TABLE event(
 -- json data representing the event
     payload CLOB NOT NULL,
 -- whether the event has been dispatched (to avoid 2PC)
-    dispatched BOOLEAN DEFAULT FALSE,
+    dispatched BOOLEAN DEFAULT FALSE NOT NULL,
 -- to support replaying events by date
     event_timestamp TIMESTAMP NOT NULL,
     CONSTRAINT event_natural_pk UNIQUE (stream_type, stream_id, revision)
@@ -22,7 +22,7 @@ CREATE TABLE stream_snapshot(
     stream_type VARCHAR(200) NOT NULL,
     stream_id VARCHAR(200) NOT NULL,
 -- snapshot data
-    includes_commits_up_to_revision SMALLINT NOT NULL,
+    includes_commits_up_to_revision BIGINT NOT NULL,
     snapshot_payload CLOB NOT NULL,
 
     CONSTRAINT stream_natural_pk UNIQUE (stream_type, stream_id)

@@ -163,8 +163,7 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
 }
 
 object CommittedEventRowMapper {
-  val QuerySelectFrom = """SELECT e.stream_type, e.stream_id, e.revision, e.payload_type, e.payload_version, e.payload, e.event_timestamp
-      FROM event e """
+  val QuerySelectFrom = """SELECT e.stream_type, e.stream_id, e.revision, e.payload_type, e.payload_version, e.payload, e.event_timestamp FROM event e """
 }
 
 class CommittedEventRowMapper(eventSerializer: EventSerializer, serializedEventUpgradeManager:SerializedEventUpgradeManager) extends RowMapper[CommittedEvent[Event]] {

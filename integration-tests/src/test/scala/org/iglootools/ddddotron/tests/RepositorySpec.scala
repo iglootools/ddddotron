@@ -18,9 +18,9 @@ import org.iglootools.ddddotron.storage.Locking
 
 @RunWith(classOf[JUnitRunner])
 class RepositorySpec extends Spec with ShouldMatchers with SpringSupport with BeforeAndAfterEach {
-  val locations = Array("classpath:/org/iglootools/ddddotron/eventstore/memory/ddddotron-eventstore-memory-context.xml")
+  val locations = Array("classpath:/org/iglootools/ddddotron/infrastructure/eventstore/ddddotron-eventstore-memory-context.xml")
 
-  implicit val dataSource = getBean(classOf[DataSource])
+  implicit val dataSource = getBean[DataSource]("hsqldbDataSource")
   implicit val eventSerializer = new JsonEventSerializer(List(Serializable[MyEvent], Serializable[SomeCommandAccepted], Serializable[AnotherCommandAccepted], Serializable[SomethingCreated]))
   implicit val aggregateRootStateSerializer: AggregateRootStateSerializer = new JsonAggregateRootStateSerializer
   implicit val serializedEventUpgradeManager = new DefaultSerializedEventUpgradeManager(List())
