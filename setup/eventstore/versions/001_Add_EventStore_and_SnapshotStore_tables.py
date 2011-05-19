@@ -10,7 +10,7 @@ event = Table('event', meta,
     Column('payload_type', String(200), nullable=False),
     Column('payload_version', SmallInteger(), nullable=False),
     Column('payload', Text(), nullable=False),
-    Column('dispatched', Boolean(), nullable=False, default=False),
+    Column('dispatched', Boolean(), nullable=False, server_default='false'),
     Column('event_timestamp', DateTime(), nullable=False),
     UniqueConstraint('stream_type', 'stream_id', 'revision', name='event_natural_pk')
 )

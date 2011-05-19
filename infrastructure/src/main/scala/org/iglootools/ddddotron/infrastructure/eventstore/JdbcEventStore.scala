@@ -71,9 +71,9 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
     val rowMapper = new CommittedEventRowMapper(eventSerializer, serializedEventUpgradeManager)
 
     // ORDER BY batch.revision ASC,e.revision ASC
-    jdbcTemplate.query(CommittedEventRowMapper.QuerySelectFrom + """WHERE e.stream_type=?
-      AND e.stream_id=?
-      AND e.revision >= ?
+    jdbcTemplate.query(CommittedEventRowMapper.QuerySelectFrom + """WHERE stream_type=?
+      AND stream_id=?
+      AND revision >= ?
       ORDER BY revision""", rowMapper, streamType, streamId, fromRevision.asInstanceOf[AnyRef])
       .asScala
       .toList
@@ -81,11 +81,11 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
 
   def markAsDispatched[E <: Event](committedEvent: CommittedEvent[E]) {
     import committedEvent._
-    val rc = jdbcTemplate.update("""UPDATE event e
-      SET e.dispatched=true
-      WHERE e.stream_type = ?
-      AND e.stream_id = ?
-      AND e.revision = ?
+    val rc = jdbcTemplate.update("""UPDATE event
+      SET dispatched=true
+      WHERE stream_type = ?
+      AND stream_id = ?
+      AND revision = ?
       """, streamType, streamId, commitRevision.asInstanceOf[AnyRef])
 
     debug("Number of rows marked as disptached: %s".format(rc))
@@ -93,12 +93,12 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
 
   def isDispatched[E<:Event](committedEvent: CommittedEvent[E]): Boolean = {
     import committedEvent._
-    jdbcTemplate.queryForInt("""SELECT dispatched
-    FROM event e
-    WHERE e.stream_type = ?
-    AND e.stream_id = ?
-    AND e.revision = ?""",
-      streamType, streamId, commitRevision.asInstanceOf[AnyRef]) == 1
+    jdbcTemplate.queryForObject("""SELECT dispatched
+    FROM event
+    WHERE stream_type = ?
+    AND stream_id = ?
+    AND revision = ?""", classOf[java.lang.Boolean],
+      streamType, streamId, commitRevision.asInstanceOf[AnyRef]) == true
 
   }
 
@@ -117,7 +117,7 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
     }
 
     new JdbcTemplate(dataSource).query(
-      CommittedEventRowMapper.QuerySelectFrom + """WHERE e.dispatched = false ORDER BY stream_type, stream_id, revision""",
+      CommittedEventRowMapper.QuerySelectFrom + """WHERE dispatched = false ORDER BY stream_type, stream_id, revision""",
       rowCallbackHandler)
   }
 
@@ -163,7 +163,7 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
 }
 
 object CommittedEventRowMapper {
-  val QuerySelectFrom = """SELECT e.stream_type, e.stream_id, e.revision, e.payload_type, e.payload_version, e.payload, e.event_timestamp FROM event e """
+  val QuerySelectFrom = """SELECT stream_type, stream_id, revision, payload_type, payload_version, payload, event_timestamp FROM event """
 }
 
 class CommittedEventRowMapper(eventSerializer: EventSerializer, serializedEventUpgradeManager:SerializedEventUpgradeManager) extends RowMapper[CommittedEvent[Event]] {

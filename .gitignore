@@ -15,4 +15,6 @@ src_managed
 project/boot
 .scala_dependencies
 
+# Python
+*.pyc
 # project-specific files
