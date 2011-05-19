@@ -2,7 +2,8 @@ import java.io.File
 import sbt._
 
 class Project(info: ProjectInfo) extends ParentProject(info) with IdeaProject  {
-  lazy val iglootoolsRepository = "Iglootools Releases Repository" at "http://www.iglootools.org/artifactory/iglootools-release"
+//  lazy val iglootoolsRepository = "Iglootools Releases Repository" at "http://www.iglootools.org/artifactory/iglootools-release"
+  lazy val iglootoolsRepository = "Iglootools Releases Repository" at "http://www.iglootools.org/artifactory/iglootools-snapshot"
 
   override def managedStyle = ManagedStyle.Maven
   //val publishTo = "Iglootools" at "http://www.iglootools.org/artifactory/iglootools-release-local"
@@ -24,7 +25,7 @@ class Project(info: ProjectInfo) extends ParentProject(info) with IdeaProject  {
 
     object Test {
       lazy val junit = "junit" % "junit" % Dependencies.JunitVersion % "test" withSources()
-      lazy val scalaTest = "org.scalatest" % "scalatest" % "1.2"  % "test" withSources()
+      lazy val scalaTest = "org.scalatest" %% "scalatest" % "1.5.RC2"  % "test" withSources()
       lazy val mockito = "org.mockito" % "mockito-all" % "1.8.5" % "test" withSources()
       lazy val logbackTest = "ch.qos.logback" % "logback-classic" % Dependencies.LogbackVersion % "test" // withSources()
       lazy val springTest = "org.springframework" % "spring-test" % Dependencies.SpringFrameworkVersion % "test" withSources()
