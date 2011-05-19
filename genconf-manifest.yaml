@@ -1,0 +1,24 @@
+---
+project: "ddddotron"
+profiles:
+    - name: "local-defaults"
+      abstract: true
+      extends: []
+      properties:
+          "dev_mode" : true
+          "infrastructure_eventstore_postgres_url": "jdbc:postgresql://localhost/ddddotron_test"
+          "infrastructure_eventstore_postgres_login": "ddddotron"
+          "infrastructure_eventstore_postgres_password": "ddddotron"
+      output_files:
+          - {target: "target/genconf/${profile}/ddddotron-config.properties", template: "genconf/ddddotron-config.properties", template_format: "genshi-text" }
+          - {target: "target/genconf/${profile}/logback.xml", template: "genconf/logback.xml", template_format: "genshi-xml"}
+
+    - name: "tests"
+      abstract: false
+      extends: ["local-defaults"]
+      properties: {}
+      output_files:
+          - {target: "api/src/test/resources/logback-test.xml", template: "genconf/logback.xml", template_format: "genshi-xml"}
+          - {target: "infrastructure/src/test/resources/logback-test.xml", template: "genconf/logback.xml", template_format: "genshi-xml"}
+          - {target: "integration-tests/src/test/resources/logback-test.xml", template: "genconf/logback.xml", template_format: "genshi-xml"}
+          - {target: "integration-tests/src/test/resources/org/iglootools/ddddotron/infrastructure/eventstore/test-config.properties", template: "genconf/ddddotron-config.properties", template_format: "genshi-text"}

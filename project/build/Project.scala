@@ -84,6 +84,8 @@ class Project(info: ProjectInfo) extends ParentProject(info) with IdeaProject  {
     override def ivyXML = Dependencies.ivyXML
     override def testOptions = TestFilter(s => true) :: super.testOptions.toList
 
+    lazy val postgresJdbc = "postgresql" % "postgresql" % "9.0-801.jdbc4" withSources()
+
     // test dependencies
     lazy val junit = Dependencies.Test.junit
     lazy val scalaTest = Dependencies.Test.scalaTest
