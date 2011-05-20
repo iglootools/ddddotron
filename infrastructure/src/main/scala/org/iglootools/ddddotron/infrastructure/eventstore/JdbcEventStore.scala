@@ -14,10 +14,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.joda.time.{DateTime, DateTimeZone}
 import com.google.common.io.CharStreams
 import java.sql.{Statement, PreparedStatement, Connection, ResultSet}
-import org.springframework.jdbc.core._
 import grizzled.slf4j.Logging
 import org.springframework.transaction.support.{TransactionCallback, TransactionTemplate}
 import org.springframework.transaction.{TransactionStatus, PlatformTransactionManager}
+import org.springframework.jdbc.core._
+import javax.management.remote.rmi._RMIConnection_Stub
 
 /**
  * FIXME: there are several non-in memory specific responsibilities that should be extracted and properly unit-tested :
@@ -81,6 +82,33 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
         ORDER BY revision""",
       Array(streamType, streamId, fromRevision.asInstanceOf[AnyRef]),
       rowCallbackHandlerDelegatingToF(f))
+  }
+
+  def doWithCommittedEvents(filter: Filter)(f: CommittedEvent[Event] => Unit) {
+    new JdbcTemplate(dataSource).query(CommittedEventRowMapper.QuerySelectFrom +
+      whereClauses(filter.specifications).mkString(if(filter.containsRestrictions) " WHERE " else "", " AND ", " ") +
+      "ORDER BY id",
+      parameters(filter.specifications).toArray,
+      rowCallbackHandlerDelegatingToF(f)
+    )
+  }
+
+  private[this] def whereClauses(filter: List[EventSpecification]): List[String] = {
+    filter map {
+      case s: EventTimestampSpecification => "event_timestamp>=?"
+      case s: RevisionSpecification => "revision >= ?"
+      case s: StreamIdSpecification => "stream_type=? AND stream_id=?"
+      case s: StreamTypeSpecification => "stream_type=?"
+    }
+  }
+
+  private[this] def parameters(filter: List[EventSpecification]): List[AnyRef] = {
+    filter flatMap {
+      case s: EventTimestampSpecification => List(s.from.toDate)
+      case s: RevisionSpecification => List(s.from.asInstanceOf[AnyRef])
+      case s: StreamIdSpecification => List(s.streamType, s.streamId)
+      case s: StreamTypeSpecification => List(s.streamType)
+    }
   }
 
   def markAsDispatched[E <: Event](committedEvent: CommittedEvent[E]) {

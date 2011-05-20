@@ -16,6 +16,10 @@ CREATE TABLE event(
     CONSTRAINT event_natural_pk UNIQUE (stream_type, stream_id, revision)
 );
 
+CREATE INDEX event_dispatched_idx ON event(dispatched);
+CREATE INDEX event_timestamp_idx ON event(event_timestamp);
+
+
 CREATE TABLE stream_snapshot(
     id BIGINT NOT NULL IDENTITY,
 -- metadata to determine stream to which this event applies (type,id)

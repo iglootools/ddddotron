@@ -28,4 +28,16 @@ trait EventStore extends EventDispatcherStorageSupport with SnapshotStore {
     events.toList
   }
   def doWithCommittedEvents(streamType: String, streamId: GUID, fromRevision: Revision = commitRevisionOne)(f: CommittedEvent[Event] => Unit)
+  def doWithCommittedEvents(filter: Filter)(f: CommittedEvent[Event] => Unit)
+
+  /**
+   * Might kill memory usage if there are too many events
+   */
+  def committedEvents(filter: Filter): List[CommittedEvent[Event]] = {
+    val events = scala.collection.mutable.ListBuffer[CommittedEvent[Event]]()
+    doWithCommittedEvents(filter) { case committedEvent =>
+      events += committedEvent
+    }
+    events.toList
+  }
 }

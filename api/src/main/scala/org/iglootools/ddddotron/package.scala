@@ -30,6 +30,18 @@ package object ddddotron {
   val OptimisticLockingStrategy = storage.OptimisticLockingStrategy
   type OptimisticLockingStrategy = storage.OptimisticLockingStrategy
 
+  type Filter = storage.Filter
+  val Filter = storage.Filter
+  type EventTimestampSpecification = storage.EventTimestampSpecification
+  val EventTimestampSpecification = storage.EventTimestampSpecification
+  type RevisionSpecification = storage.RevisionSpecification
+  val RevisionSpecification = storage.RevisionSpecification
+  type StreamIdSpecification = storage.StreamIdSpecification
+  val StreamIdSpecification = storage.StreamIdSpecification
+  type StreamTypeSpecification = storage.StreamTypeSpecification
+  val StreamTypeSpecification = storage.StreamTypeSpecification
+  type EventSpecification = storage.EventSpecification
+
   // Enterprise Integration
   type EventBus = ei.EventBus
 

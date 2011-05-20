@@ -12,10 +12,13 @@ import javax.sql.DataSource
 import org.scalatest.{BeforeAndAfterEach, Spec}
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate
 import org.springframework.transaction.{TransactionStatus, TransactionDefinition, PlatformTransactionManager}
-import org.iglootools.ddddotron.storage.Locking
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.springframework.transaction.support.{TransactionCallback, TransactionTemplate, DefaultTransactionDefinition}
+import storage.{Locking}
+import javax.management.remote.rmi._RMIConnection_Stub
+import org.scala_tools.time.Imports._
+import org.joda.time.DateTime
 
 @RunWith(classOf[JUnitRunner])
 abstract class RepositorySpec extends Spec with SpringSupport with TableDrivenPropertyChecks with ShouldMatchers with BeforeAndAfterEach {
@@ -57,6 +60,46 @@ abstract class RepositorySpec extends Spec with SpringSupport with TableDrivenPr
         val commit = CommitAttempt("MyAggregate", "myId", None, List(MyEvent("some characters like that: éèàçç")))
         eventStore.attemptCommit(commit)
         eventStore.committedEvents("MyAggregate", "myId") should be === toCommittedEvents(commit)
+      }
+
+      it("should return committedEvents matching stream id filter") {
+        val commit1 = CommitAttempt("MyAggregate", "myId", None, List(MyEvent("1-data"), MyEvent("2-data")))
+        val commit2 = CommitAttempt("MyAggregate", "myId2", None, List(MyEvent("1-data"), MyEvent("2-data")))
+        List(commit1, commit2) foreach (eventStore.attemptCommit(_))
+        eventStore.committedEvents(Filter(List(StreamIdSpecification("MyAggregate", "myId")))) should be === toCommittedEvents(commit1)
+      }
+
+       it("should return committedEvents matching stream type filter") {
+        val commit1 = CommitAttempt("MyAggregate", "someId", None, List(MyEvent("1-data"), MyEvent("2-data")))
+        val commit2 = CommitAttempt("AnotherAggregateType", "someId", None, List(MyEvent("1-data"), MyEvent("2-data")))
+        List(commit1, commit2) foreach (eventStore.attemptCommit(_))
+        eventStore.committedEvents(Filter(List(StreamTypeSpecification("MyAggregate")))) should be === toCommittedEvents(commit1)
+      }
+
+      it("should return committedEvents matching revision filter") {
+        val commit1 = CommitAttempt("MyAggregate", "someId", None, List(MyEvent("1-data"), MyEvent("2-data")))
+        val commit2 = CommitAttempt("MyAggregate", "someId", commit1.expectedEventRevisions.lastOption, List(MyEvent("3-data"), MyEvent("4-data")))
+        val commit3 = CommitAttempt("MyAggregate", "someId", commit2.expectedEventRevisions.lastOption, List(MyEvent("5-data"), MyEvent("6-data")))
+        List(commit1, commit2, commit3) foreach (eventStore.attemptCommit(_))
+        eventStore.committedEvents(
+          Filter(
+            List(
+              StreamIdSpecification("MyAggregate", "someId"),
+              RevisionSpecification(commit2.expectedEventRevisions.head)))) should be === (List(commit2, commit3) flatMap (toCommittedEvents(_)))
+      }
+
+      it("should return events committed after timestamp") {
+        val anHourAgo = currentUtcDateTime - 1.hour
+
+        val commit1 = CommitAttempt("MyAggregate", "someId", None, List(MyEvent("1-data", timestamp = anHourAgo), MyEvent("2-data", timestamp = anHourAgo)))
+        val commit2 = CommitAttempt("MyAggregate", "someId", commit1.expectedEventRevisions.lastOption, List(MyEvent("3-data"), MyEvent("4-data")))
+        val commit3 = CommitAttempt("MyAggregate", "someId", commit2.expectedEventRevisions.lastOption, List(MyEvent("5-data"), MyEvent("6-data")))
+        List(commit1, commit2, commit3) foreach (eventStore.attemptCommit(_))
+        eventStore.committedEvents(
+          Filter(
+            List(
+              StreamIdSpecification("MyAggregate", "someId"),
+              EventTimestampSpecification(currentUtcDateTime - 1.minute)))) should be === (List(commit2, commit3) flatMap (toCommittedEvents(_)))
       }
     }
     describe("Event Dispatcher Storage Support") {
