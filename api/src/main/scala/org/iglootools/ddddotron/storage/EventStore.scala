@@ -17,5 +17,5 @@ trait EventStore extends EventDispatcherStorageSupport with SnapshotStore {
    */
   def attemptCommit[E <: Event](attempt: CommitAttempt[E])
   def committedEvents(streamType: String, streamId: GUID, fromRevision: Revision = commitRevisionOne): List[CommittedEvent[Event]]
-
+  def doWithCommittedEvents(streamType: String, streamId: GUID, fromRevision: Revision = commitRevisionOne)(f: CommittedEvent[Event] => Unit)
 }

@@ -73,6 +73,9 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
       event.timestamp.toDate)
   }
 
+  /**
+   * Might kill memory usage if there are too many events. Please use doWithCommittedEvents instead
+   */
   def committedEvents(streamType: String, streamId: GUID, fromRevision: Revision = commitRevisionOne): List[CommittedEvent[Event]] = {
     val rowMapper = new CommittedEventRowMapper(eventSerializer, serializedEventUpgradeManager)
 
@@ -83,7 +86,16 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
         ORDER BY revision""", rowMapper, streamType, streamId, fromRevision.asInstanceOf[AnyRef])
       .asScala
       .toList
+  }
 
+  def doWithCommittedEvents(streamType: String, streamId: GUID, fromRevision: Revision = commitRevisionOne)(f: CommittedEvent[Event] => Unit) {
+    new JdbcTemplate(dataSource).query(
+      CommittedEventRowMapper.QuerySelectFrom + """WHERE stream_type=?
+        AND stream_id=?
+        AND revision >= ?
+        ORDER BY revision""",
+      Array(streamType, streamId, fromRevision.asInstanceOf[AnyRef]),
+      rowCallbackHandlerDelegatingToF(f))
   }
 
   def markAsDispatched[E <: Event](committedEvent: CommittedEvent[E]) {
@@ -110,22 +122,9 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
   }
 
   def doWithUndispatchedCommittedEvents(f: CommittedEvent[Event] => Unit) {
-
-    val rowCallbackHandler: RowCallbackHandler = new RowCallbackHandler() {
-      val rowMapper = new CommittedEventRowMapper(eventSerializer, serializedEventUpgradeManager)
-      var rowNum: Int = 0
-
-      def processRow(resultSet: ResultSet) {
-        val e = rowMapper.mapRow(resultSet, rowNum)
-        f(e)
-        debug("Mapped Row %s to %s".format(rowNum, e))
-        rowNum += 1
-      }
-    }
-
     new JdbcTemplate(dataSource).query(
       CommittedEventRowMapper.QuerySelectFrom + """WHERE dispatched = false ORDER BY stream_type, stream_id, revision""",
-      rowCallbackHandler)
+      rowCallbackHandlerDelegatingToF(f))
   }
 
   def streamSnapshotOption[T <: AnyRef](streamType: String, streamId: GUID)(implicit mf: Manifest[T]): Option[StreamSnapshot[T]] = {
@@ -168,12 +167,27 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
     jdbcTemplate.update("DELETE from stream_snapshot")
   }
 
-  def executeInTransaction[T](txManager: PlatformTransactionManager)(f: => T): T = {
+  private[this] def executeInTransaction[T](txManager: PlatformTransactionManager)(f: => T): T = {
     new TransactionTemplate(txManager).execute(new TransactionCallback[T]() {
       def doInTransaction(p1: TransactionStatus): T = {
         f
       }
     })
+  }
+
+
+  private[this] def rowCallbackHandlerDelegatingToF(f: CommittedEvent[Event] => Unit): RowCallbackHandler = {
+    new RowCallbackHandler() {
+      val rowMapper = new CommittedEventRowMapper(eventSerializer, serializedEventUpgradeManager)
+      var rowNum: Int = 0
+
+      def processRow(resultSet: ResultSet) {
+        val e = rowMapper.mapRow(resultSet, rowNum)
+        f(e)
+        debug("Mapped Row %s to %s".format(rowNum, e))
+        rowNum += 1
+      }
+    }
   }
 }
 
