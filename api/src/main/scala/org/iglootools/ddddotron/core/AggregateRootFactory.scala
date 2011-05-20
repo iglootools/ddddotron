@@ -1,5 +1,7 @@
 package org.iglootools.ddddotron.core
 
+import scala.Option._
+
 trait AggregateRootFactory[E <:Event, S <: AnyRef, AR <: AggregateRoot[E, S, AR]]{
   protected[this] def createAggregateRoot(id: GUID, state: S, commitRevision: Option[Revision], pendingEvents: List[E]): AR
   protected[this] def createInitialState: S
@@ -13,15 +15,18 @@ trait AggregateRootFactory[E <:Event, S <: AnyRef, AR <: AggregateRoot[E, S, AR]
   }
 
   def loadFromHistory(aggregateRootId: GUID, eventHistory: EventHistory[E,S]): AR = {
-    val aggregateBuilder = new IncrementalAggregateRootBuilder(
-      createAggregateRoot(
-        aggregateRootId,
-        eventHistory.state.getOrElse(createInitialState),
-        eventHistory.snapshotCommitRevision,
-        List()))
-
+    val aggregateBuilder = aggregateRootBuilder(aggregateRootId, eventHistory.snapshot)
     eventHistory.additionalCommittedEvents foreach (aggregateBuilder.withEvent(_))
     return aggregateBuilder.done
+  }
+
+  def aggregateRootBuilder(aggregateRootId: GUID, snapshot: Option[StreamSnapshot[S]]): IncrementalAggregateRootBuilder = {
+    new IncrementalAggregateRootBuilder(
+          createAggregateRoot(
+            aggregateRootId,
+            snapshot.map(_.state).getOrElse(createInitialState),
+            snapshot.map(_.includesCommitsUpToRevision),
+            List()))
   }
 
   class IncrementalAggregateRootBuilder(aggregateRoot: AR) {
@@ -29,7 +34,7 @@ trait AggregateRootFactory[E <:Event, S <: AnyRef, AR <: AggregateRoot[E, S, AR]
     var currentRevision = aggregateRoot.commitRevision
     def withEvent(committedEvent: CommittedEvent[E]) {
       currentAR = currentAR.applyEvent(committedEvent.event)
-      currentRevision = Some(committedEvent.commitRevision)greg
+      currentRevision = Some(committedEvent.commitRevision)
 
     }
     def done = {
