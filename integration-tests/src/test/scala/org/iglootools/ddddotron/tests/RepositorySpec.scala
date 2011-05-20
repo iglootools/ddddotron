@@ -23,7 +23,7 @@ abstract class RepositorySpec extends Spec with SpringSupport with TableDrivenPr
 
   var currentTx: Option[TransactionStatus] = None
 
-//  val txManager = getBean(classOf[PlatformTransactionManager])
+  implicit val txManager = getBean(classOf[PlatformTransactionManager])
   implicit val dataSource = getBean(classOf[DataSource])
 
   implicit val eventSerializer = new JsonEventSerializer(List(Serializable[MyEvent], Serializable[SomeCommandAccepted], Serializable[AnotherCommandAccepted], Serializable[SomethingCreated]))

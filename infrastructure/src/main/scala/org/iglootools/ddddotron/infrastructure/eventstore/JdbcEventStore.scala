@@ -16,6 +16,8 @@ import com.google.common.io.CharStreams
 import java.sql.{Statement, PreparedStatement, Connection, ResultSet}
 import org.springframework.jdbc.core._
 import grizzled.slf4j.Logging
+import org.springframework.transaction.support.{TransactionCallback, TransactionTemplate}
+import org.springframework.transaction.{TransactionStatus, PlatformTransactionManager}
 
 /**
  * FIXME: there are several non-in memory specific responsibilities that should be extracted and properly unit-tested :
@@ -28,11 +30,12 @@ import grizzled.slf4j.Logging
  * @see http://jasondentler.com/blog/2010/10/simple-cqrs-nhibernate-event-store/
  */
 class JdbcEventStore(implicit eventSerializer: EventSerializer,
-                         streamStateSerializer: StreamStateSerializer,
-                         serializedEventUpgradeManager: SerializedEventUpgradeManager,
-                         dataSource: DataSource) extends EventStore with Logging {
+                     streamStateSerializer: StreamStateSerializer,
+                     serializedEventUpgradeManager: SerializedEventUpgradeManager,
+                     dataSource: DataSource,
+                     txManager: PlatformTransactionManager) extends EventStore with Logging {
   val jdbcTemplate = new SimpleJdbcTemplate(dataSource)
-
+  val tx = executeInTransaction[Unit](txManager)_
   /**
    * @throws ConcurrencyException
    */
@@ -40,10 +43,13 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
     try {
       debug("Attempting to commit: %s.".format(attempt))
 
-      for ((e, r) <-  attempt.events zip attempt.expectedEventRevisions) {
-        debug("[%s] Inserting Event revision: %s".format(r, r))
-        persistEvent(attempt.streamType, attempt.streamId, r, e)
+      tx {
+        for ((e, r) <-  attempt.events zip attempt.expectedEventRevisions) {
+          debug("[%s] Inserting Event revision: %s".format(r, r))
+          persistEvent(attempt.streamType, attempt.streamId, r, e)
+        }
       }
+
 
     } catch {
       case e: DataIntegrityViolationException =>
@@ -72,11 +78,12 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
 
     // ORDER BY batch.revision ASC,e.revision ASC
     jdbcTemplate.query(CommittedEventRowMapper.QuerySelectFrom + """WHERE stream_type=?
-      AND stream_id=?
-      AND revision >= ?
-      ORDER BY revision""", rowMapper, streamType, streamId, fromRevision.asInstanceOf[AnyRef])
+        AND stream_id=?
+        AND revision >= ?
+        ORDER BY revision""", rowMapper, streamType, streamId, fromRevision.asInstanceOf[AnyRef])
       .asScala
       .toList
+
   }
 
   def markAsDispatched[E <: Event](committedEvent: CommittedEvent[E]) {
@@ -94,10 +101,10 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
   def isDispatched[E<:Event](committedEvent: CommittedEvent[E]): Boolean = {
     import committedEvent._
     jdbcTemplate.queryForObject("""SELECT dispatched
-    FROM event
-    WHERE stream_type = ?
-    AND stream_id = ?
-    AND revision = ?""", classOf[java.lang.Boolean],
+        FROM event
+        WHERE stream_type = ?
+        AND stream_id = ?
+        AND revision = ?""", classOf[java.lang.Boolean],
       streamType, streamId, commitRevision.asInstanceOf[AnyRef]) == true
 
   }
@@ -159,6 +166,14 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
 
   def deleteAllSnapshots() {
     jdbcTemplate.update("DELETE from stream_snapshot")
+  }
+
+  def executeInTransaction[T](txManager: PlatformTransactionManager)(f: => T): T = {
+    new TransactionTemplate(txManager).execute(new TransactionCallback[T]() {
+      def doInTransaction(p1: TransactionStatus): T = {
+        f
+      }
+    })
   }
 }
 
