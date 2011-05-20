@@ -12,22 +12,14 @@ final class Repository[E <: Event, S<:AnyRef, AR <: AggregateRoot[E,S,AR]](val a
 
   def getById(id: GUID): AR = {
     val snapshot: Option[StreamSnapshot[S]] = eventStore.streamSnapshotOption[S](aggregateRootType, id)
-//    val committedEvents: List[CommittedEvent[E]] = eventStore.committedEvents(
-//      streamType= aggregateRootType,
-//      streamId=id,
-//      fromRevision= snapshot map (_.includesCommitsUpToRevision + 1) getOrElse(commitRevisionOne)) map (_.asInstanceOf[CommittedEvent[E]])
-//    assume(snapshot.isDefined || committedEvents.nonEmpty, "Aggregate ID does not exist: %s".format(id))
-//    aggregateRootFactory.loadFromHistory(id, EventHistory(snapshot, committedEvents))
-
+    val fromRevision =  snapshot map (_.includesCommitsUpToRevision + 1) getOrElse(commitRevisionOne)
     val builder = aggregateRootFactory.aggregateRootBuilder(id, snapshot)
-    eventStore.doWithCommittedEvents(
-      streamType= aggregateRootType,
-      streamId=id,
-      fromRevision= snapshot map (_.includesCommitsUpToRevision + 1) getOrElse(commitRevisionOne)) { committedEvent: CommittedEvent[Event] =>
+
+    eventStore.doWithCommittedEvents(streamType= aggregateRootType,streamId=id, fromRevision= fromRevision) {
+      committedEvent: CommittedEvent[Event] =>
         builder.withEvent(committedEvent.asInstanceOf[CommittedEvent[E]])
     }
     builder.done
-
   }
 
   /**

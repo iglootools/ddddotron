@@ -73,21 +73,6 @@ class JdbcEventStore(implicit eventSerializer: EventSerializer,
       event.timestamp.toDate)
   }
 
-  /**
-   * Might kill memory usage if there are too many events. Please use doWithCommittedEvents instead
-   */
-  def committedEvents(streamType: String, streamId: GUID, fromRevision: Revision = commitRevisionOne): List[CommittedEvent[Event]] = {
-    val rowMapper = new CommittedEventRowMapper(eventSerializer, serializedEventUpgradeManager)
-
-    // ORDER BY batch.revision ASC,e.revision ASC
-    jdbcTemplate.query(CommittedEventRowMapper.QuerySelectFrom + """WHERE stream_type=?
-        AND stream_id=?
-        AND revision >= ?
-        ORDER BY revision""", rowMapper, streamType, streamId, fromRevision.asInstanceOf[AnyRef])
-      .asScala
-      .toList
-  }
-
   def doWithCommittedEvents(streamType: String, streamId: GUID, fromRevision: Revision = commitRevisionOne)(f: CommittedEvent[Event] => Unit) {
     new JdbcTemplate(dataSource).query(
       CommittedEventRowMapper.QuerySelectFrom + """WHERE stream_type=?
