@@ -14,6 +14,10 @@ final case class EventHistory[+E <: Event, +S <: AnyRef](val snapshot: Option[St
     lastCommitRevision.orElse(snapshot map (_.includesCommitsUpToRevision))
   }
 
+  def snapshotCommitRevision: Option[Revision] = {
+    snapshot map (_.includesCommitsUpToRevision)
+  }
+
   def additionalEvents: List[E] = additionalCommittedEvents map (_.event)
 
 }
