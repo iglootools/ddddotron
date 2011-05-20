@@ -52,6 +52,12 @@ abstract class RepositorySpec extends Spec with SpringSupport with TableDrivenPr
         eventStore.attemptCommit(commit1)
         evaluating { eventStore.attemptCommit(commit2) } should produce [ConcurrencyException]
       }
+
+      it("should support non-ASCII characters in event data") {
+        val commit = CommitAttempt("MyAggregate", "myId", None, List(MyEvent("some characters like that: éèàçç")))
+        eventStore.attemptCommit(commit)
+        eventStore.committedEvents("MyAggregate", "myId") should be === toCommittedEvents(commit)
+      }
     }
     describe("Event Dispatcher Storage Support") {
       it("should retrieve undispatched events") {
